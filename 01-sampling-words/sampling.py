@@ -1,3 +1,6 @@
+import math
+import random
+
 def buildVocabulary(f: str) -> dict:
     # read file
     # split words by <space> and put them in a dictionary 
@@ -18,27 +21,41 @@ def buildVocabulary(f: str) -> dict:
 
     return voc
 
-def predictNextWord(vocab: dict, currentWord: str) -> str:
+def predictNextWord(vocab: dict, currentWord: str) -> dict:
     if currentWord not in vocab:
         return None
     values = vocab[currentWord]
-    nextWord = ''
-    maxValue = 0
+    totalValue = 0
+    for v in values.values():
+        totalValue += v
+    probs = {}
     for k in values:
-        if values[k] > maxValue:
-            nextWord = k
-            maxValue = values[k]
-    return nextWord
+        probs[k] = values[k]/totalValue
+    return probs
+
+def sampleNextWord(probs: dict):
+    rn = random.random()
+    cummProb = 0
+    for k in probs:
+        val = probs[k]
+        cummProb += val
+        if rn <= cummProb:
+            return k
+    return None
 
 def sampling():
     fileToRead = 'data/doc.txt'
     vocab = buildVocabulary(fileToRead)
     print(vocab)
-    nextWord = 'I'
+    nextPredictedWord = 'I'
+    print(nextPredictedWord, end = ' ')
     while True:
-        print(nextWord, end=' ')
-        nextWord = predictNextWord(vocab, nextWord)
-        if nextWord is None:
+        nextValueProbs = predictNextWord(vocab, nextPredictedWord)
+        # print(nextValueProbs)
+        if nextValueProbs is not None:
+            nextPredictedWord = sampleNextWord(nextValueProbs)
+            print(nextPredictedWord, end = ' ')
+        else:
             break
     
 
