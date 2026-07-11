@@ -1,3 +1,5 @@
+import math
+
 class Value:
     def __init__(self, value, _prev = (), op = ""):
         self.value = value
@@ -87,6 +89,19 @@ class Value:
 
     def __rtruediv__(self, other):
         return other * (self ** -1)
+
+    def tanh(self):
+        t = math.tanh(self.value)
+        out = Value(
+            t,
+            (self,),
+            "tanh"
+        )
+        def _backward():
+            self.grad += out.grad * (1 - out.value ** 2)
+
+        out._backward = _backward
+        return out
 
 if __name__ == "__main__":
     a = Value(2)
